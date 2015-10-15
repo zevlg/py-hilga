@@ -21,11 +21,13 @@ class SpeedWidget(HilgaGauge):
 
         self.obd = obdiface
         self.speed = -100
+        self.speed4 = self.speed5 = 0
 
         self.avg_n = 0
         self.avg_speed = 0
 
         self.fnt = load_font("Anton.ttf", 64)
+        self.fnt = load_font("Anton.ttf", 128)
         self.dfnt = load_font("default.ttf", 24)
 
         # precalculate position for 1,2,3-symbol speed label
@@ -54,6 +56,21 @@ class SpeedWidget(HilgaGauge):
         pavg = self.avg_speed
         self.calc_moving_avg(speed)
 
+        # Calc speed according to RPM
+        if self.obd.rpm > 1800:
+            sp4 = int(round(72 + (self.obd.rpm - 2000)/33.333333))
+            sp5 = int(round(82 + (self.obd.rpm - 2000)/25.0))
+            if sp4 != self.speed4 or sp5 != self.speed5:
+                self.clear()
+                def draw_speed(ds, y):
+                    speedlbl = str(ds)
+                    ssxoff = self.ssxoffs[len(speedlbl)-1]
+                    self.surf.blit(self.fnt.render(speedlbl, True, (255,255,255)), (ssxoff, y))
+                draw_speed(sp4, 100)
+                draw_speed(sp5, 228)
+                self.speed4 = sp4
+                self.speed5 = sp5
+
         # redraw if changed
         if round(speed) != round(self.speed) \
                or round(pavg) != round(self.avg_speed):
@@ -66,6 +83,6 @@ class SpeedWidget(HilgaGauge):
                            (ssxoff, 120))
             self.surf.blit(self.dfnt.render("avg: %d"%int(round(self.avg_speed)),
                                             True, (100,100,100)), (80,220))
-            self.redraw_into(surf)
 
+        self.redraw_into(surf)
         self.speed = speed

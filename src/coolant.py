@@ -41,7 +41,7 @@ class CoolantWidget(HilgaGauge):
             # gauge pointer
             self.redraw_pointer(ntemp)
 
-            self.surf.blit(self.fnt.render(u"%d\u00B0"%ntemp, True, (100,100,100)), (30,90))
+            self.surf.blit(self.fnt.render(u"%d\u00B0"%ntemp, True, (160,160,160)), (30,90))
 
             self.redraw_into(surf)
 

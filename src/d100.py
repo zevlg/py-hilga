@@ -65,7 +65,7 @@ class D100Iface(HilgaObject):
     def get_status(self):
         import time
         try:
-            hconn = urllib2.urlopen("http://%s/%s"%(self.d100_addr, self.script_name))
+            hconn = urllib2.urlopen("http://%s/%s"%(self.d100_addr, self.script_name), None, 5)
             data = hconn.read()
             self.status = json.loads(data)
             hconn.close()
@@ -84,29 +84,40 @@ class D100Iface(HilgaObject):
 
     def upload_script(self, login="admin", passwd="admin"):
         import pexpect
-        p = pexpect.spawn('telnet %s'%self.d100_addr)
-        p.expect("login:")
-        p.sendline(login)
-        p.expect("Password:")
-        p.sendline(passwd)
-        p.expect("#")
-        p.sendline("cat > /tmp/3w/%s"%self.script_name)
-        p.send(SCRIPT)
-        p.sendeof()
-        p.sendline("exit")
+        try:
+            p = pexpect.spawn('telnet %s'%self.d100_addr)
+            p.expect("login:")
+            p.sendline(login)
+            p.expect("Password:")
+            p.sendline(passwd)
+            p.expect("#")
+            p.sendline("cat > /tmp/3w/%s"%self.script_name)
+            p.send(SCRIPT)
+            p.sendeof()
+            p.sendline("exit")
 
-        p.interact()
-        p.close()
+            p.interact()
+            p.close()
+        except:
+            pass
 
 class D100Widget(HilgaWidget):
     def __init__(self, d100iface, (x, y), **opts):
-        HilgaWidget.__init__(self, (x, y, 80, 120), **opts)
+        HilgaWidget.__init__(self, (x, y, 80, 140), **opts)
 
         # Instance of D100Iface
         self.d100 = d100iface
-        self.prevstatus = None
+        self.prevstatus = {}
 
         self.fnt = load_font("Anton.ttf", 32)
+
+    def get_contype(self, status):
+        si = status.get("sysinfo", [0]*7)
+        if type(si) == list and len(si) > 6:
+            ntype = si[6]
+        else:
+            ntype = 0 
+        return ntype
 
     def draw(self, tick, surf):
         newstatus = self.d100.status
@@ -124,7 +135,9 @@ class D100Widget(HilgaWidget):
 
             # ppstate - color for network_type
             pstate = newstatus.get("pppState", -1)
-            ntype = newstatus.get("sysinfo", [0]*7)[6]
+            ntype = self.get_contype(newstatus)
+#            print "NTYPE", ntype, "SYSINFO", newstatus.get("sysinfo", None)
+
             if pstate == PPP_CONNECTED:
                 nv = 36*ntype
                 if nv > 255:
@@ -135,12 +148,12 @@ class D100Widget(HilgaWidget):
             else:
                 pcol = (200, 0, 0)
 
-            ntlabel = NTYPES.get(ntype, "NONE")
+            ntlabel = NTYPES.get(ntype, "UNK"+str(ntype))
             self.surf.blit(self.fnt.render(ntlabel, True, pcol), (0, 64))
 
             # Play sound
             if pstate == PPP_CONNECTED:
-                ptype = self.prevstatus.get("sysinfo", [0]*7)[6] if self.prevstatus else 0
+                ptype = self.get_contype(self.prevstatus)
                 if ptype < HSUPA and ntype >= HSUPA and ntype <= HSPA:
                     play_sound("laugh1.wav")
                 elif ptype < EDGE and ntype >= EDGE and ntype <= HSPA:

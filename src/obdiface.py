@@ -22,9 +22,22 @@ class ObdIface(HilgaObject):
         if self.port.State == 0:
             self.port.close()
             self.port = None
+        else:
+            # ARGUABLE
+            try:
+                print self.port.get_dtc()
+            except:
+                pass
 
     def is_connected(self):
         return self.port
+
+    def command(self, cmd):
+        try:
+            self.port.send_command(cmd)
+            return self.port.get_result()
+        except:
+            return "---"
 
     def sensor(self, idx):
         try:

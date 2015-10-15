@@ -3,7 +3,9 @@ import pygame, eventlet
 from misc import FPS
 from objects import HilgaObject
 from obdiface import ObdIface
-from fuel import FuelIface, FuelWidget, KanistraWidget
+from fuel import FuelIface, FuelWidget
+from battery import BatteryWidget
+from clock import ClockWidget
 from speed import SpeedWidget
 from rpm import RpmWidget
 from coolant import CoolantWidget
@@ -21,13 +23,14 @@ class HilgaBoard(HilgaObject):
 
         fiface = FuelIface(**opts)
         self.fuel = FuelWidget(fiface, (660, 360), **opts)
-        self.can = KanistraWidget(fiface, (580, 260), **opts)
+#        self.can = KanistraWidget(fiface, (580, 260), **opts)
 
         self.obd = obd = ObdIface(**opts) #port="/dev/pts/3", **opts)
         self.speed = SpeedWidget(obd, (274, 20))
-
         self.rpm = RpmWidget(obd, (10, 120), **opts)
         self.coolant = CoolantWidget(obd, (580, 360), **opts)
+        self.bat = BatteryWidget(obd, (580, 260), **opts)
+        self.clk = ClockWidget(obd, (580, 300), **opts)
 
         # high beam / oil presure / brake
         self.hbeam = HighBeamWidget((94, 376), **opts)
@@ -56,7 +59,9 @@ class HilgaBoard(HilgaObject):
         self.rpm.draw(self.ticks, self.screen)
         self.coolant.draw(self.ticks, self.screen)
         self.fuel.draw(self.ticks, self.screen)
-        self.can.draw(self.ticks, self.screen)
+        self.bat.draw(self.ticks, self.screen)
+        self.clk.draw(self.ticks, self.screen)
+#        self.can.draw(self.ticks, self.screen)
 
         self.hbeam.draw(self.ticks, self.screen)
         self.oil.draw(self.ticks, self.screen)

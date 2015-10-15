@@ -9,6 +9,7 @@ GAUGE_WIDTH = 4
 ARC_COLOR = (100,100,100)
 STROKE_COLOR = (100,100,100)
 LABEL_COLOR = (220,220,220)
+POINTER_COLOR = (255,0,0)
 
 class HilgaGauge(HilgaWidget):
     """Opts:
@@ -69,7 +70,7 @@ class HilgaGauge(HilgaWidget):
 
         pwidth = self.opts.get("pwidth", 3)
         ptype  = self.opts.get("ptype", "short")
-        pcolor = self.opts.get("pcolor", (255,0,0))
+        pcolor = self.opts.get("pcolor", POINTER_COLOR)
         w, h = self.size
 
         # TODO: take into account min_value as well (now 0 is assumed)

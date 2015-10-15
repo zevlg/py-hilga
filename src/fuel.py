@@ -15,12 +15,15 @@ TANK_FULL = 24.0                        #  4 Ohm
 AIN_ADDR=0x48
 
 LABEL_COL = (100,100,100)
+LITRES_COL = (200, 200, 200)
 
 class FuelIface(HilgaObject):
-    def __init__(self, period=10, **opts):
+    def __init__(self, period=0.5, nsamples=10, **opts):
         HilgaObject.__init__(self, **opts)
 
         self.period = period
+
+        self.samples = []
 
         self.analog = 0                 # analog value [<TANK_EMPTY>..<TANK_FULL>]
         self.litres = 0
@@ -34,9 +37,15 @@ class FuelIface(HilgaObject):
     def get_status(self):
         self.bus.write_byte(AIN_ADDR, 0x40)
         self.bus.read_byte(AIN_ADDR)    # dummy read to start conversion
-        self.analog = self.bus.read_byte(AIN_ADDR)
-        if self.analog > TANK_EMPTY:
-            self.analog = TANK_EMPTY
+
+        val = self.bus.read_byte(AIN_ADDR)
+        if val > TANK_EMPTY:
+            val = TANK_EMPTY
+        self.samples.insert(0, val)
+        if len(self.samples) > self.opts.get("nsamples", 10):
+            self.samples.pop()
+
+        self.analog = sum(self.samples)/len(self.samples)
         self.percents = (TANK_EMPTY - self.analog)/(TANK_EMPTY - TANK_FULL)
         self.litres = int(TANK_VOLUME*self.percents)
 
@@ -67,13 +76,12 @@ class FuelWidget(HilgaGauge):
             self.redraw_pointer(self.fuel.analog)
 
             self.surf.blit(self.fnt.render("%d%%"%(100*nstate[0],), True, LABEL_COL), (30,80))
-            self.surf.blit(self.fnt.render("%dL"%nstate[1], True, LABEL_COL), (30,112))
+            self.surf.blit(self.fnt.render("%dL"%nstate[1], True, LITRES_COL), (30,112))
             self.surf.blit(self.fnt.render(" %d "%self.fuel.analog, True, LABEL_COL), (30,144))
 #            self.surf.blit(self.fnt.render("Fuel:", True, (100,100,100)), (0,0))
 #            self.surf.blit(self.fnt.render("%d%% %dL"%nstate, True, (255,255,255)), (0,32))
 
-            self.redraw_into(surf)
-
+        self.redraw_into(surf)
         self.state = nstate
 
 # funny
@@ -101,6 +109,5 @@ class KanistraWidget(HilgaGauge):
 #            self.surf.blit(self.fnt.render("Fuel:", True, (100,100,100)), (0,0))
 #            self.surf.blit(self.fnt.render("%d%% %dL"%nstate, True, (255,255,255)), (0,32))
 
-            self.redraw_into(surf)
-
+        self.redraw_into(surf)
         self.state = nstate
