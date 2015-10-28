@@ -10,7 +10,7 @@ class ObdIface(HilgaObject):
     SPEED_IDX=13                        # speed
     ENGINETIME_IDX=31                   # seconds
 
-    def __init__(self, port="/dev/ttyUSB0", **opts):
+    def __init__(self, port="/dev/usbobd", **opts):
         HilgaObject.__init__(self, **opts)
 
         self.portname = port

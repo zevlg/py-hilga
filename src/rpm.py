@@ -38,8 +38,9 @@ class RpmWidget(HilgaGauge):
             # gauge pointer
             self.redraw_pointer(rpm)
 
-            self.surf.blit(self.fnt.render("RPM: %d"%rpm, True, (50,50,50)), (40,300))
-            self.surf.blit(self.fnt.render("Load%%: %d"%int(round(load)), True, (110,110,110)), (40, 340))
+            self.surf.blit(self.fnt.render("%d"%rpm, True, (50,50,50)), (60, 300))
+            self.surf.blit(self.fnt.render("%d%%"%int(round(load)), True, (100,100,100)), (140,300))
+#            self.surf.blit(self.fnt.render("Load%%: %d"%int(round(load)), True, (110,110,110)), (40, 340))
 
         self.redraw_into(surf)
         self.rpm = rpm

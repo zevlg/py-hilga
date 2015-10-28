@@ -103,7 +103,7 @@ class D100Iface(HilgaObject):
 
 class D100Widget(HilgaWidget):
     def __init__(self, d100iface, (x, y), **opts):
-        HilgaWidget.__init__(self, (x, y, 80, 140), **opts)
+        HilgaWidget.__init__(self, (x, y, 120, 140), **opts)
 
         # Instance of D100Iface
         self.d100 = d100iface

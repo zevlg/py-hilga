@@ -6,7 +6,8 @@ from obdiface import ObdIface
 from fuel import FuelIface, FuelWidget
 from battery import BatteryWidget
 from clock import ClockWidget
-from speed import SpeedWidget
+from gpsiface import GpsIface
+from speed import GpsSpeedWidget, RpmSpeedWidget
 from rpm import RpmWidget
 from coolant import CoolantWidget
 from leds import HighBeamWidget, OilWidget, BreakWidget
@@ -26,7 +27,9 @@ class HilgaBoard(HilgaObject):
 #        self.can = KanistraWidget(fiface, (580, 260), **opts)
 
         self.obd = obd = ObdIface(**opts) #port="/dev/pts/3", **opts)
-        self.speed = SpeedWidget(obd, (274, 20))
+        self.gps = gps = GpsIface(**opts)
+        self.speed = GpsSpeedWidget(gps, (274, 20))
+        self.rspeed = RpmSpeedWidget(obd, (359, 340))
         self.rpm = RpmWidget(obd, (10, 120), **opts)
         self.coolant = CoolantWidget(obd, (580, 360), **opts)
         self.bat = BatteryWidget(obd, (580, 260), **opts)
@@ -56,6 +59,7 @@ class HilgaBoard(HilgaObject):
 
         # Render widgets
         self.speed.draw(self.ticks, self.screen)
+        self.rspeed.draw(self.ticks, self.screen)
         self.rpm.draw(self.ticks, self.screen)
         self.coolant.draw(self.ticks, self.screen)
         self.fuel.draw(self.ticks, self.screen)
