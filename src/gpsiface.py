@@ -26,7 +26,10 @@ class GpsIface(HilgaObject):
                 self.tpv.update(data)
 
     def speed_kmh(self):
-        return self.get("speed", 0) * 1.852
+        return 1.852 * self.speed_knots()
+
+    def speed_knots(self):
+        return self.get("speed", 0)
 
     def get(self, name, default):
         return self.tpv.get(name, default)
