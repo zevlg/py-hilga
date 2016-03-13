@@ -10,7 +10,7 @@ ASTART = -pi/4
 ASTOP = pi + pi/4
 
 SPEED_MIN = 0
-SPEED_MAX = 160
+SPEED_MAX = 160 
 
 SG_WIDTH = 250
 class GpsSpeedWidget(HilgaGauge):
