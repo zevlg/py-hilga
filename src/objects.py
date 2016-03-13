@@ -13,6 +13,18 @@ class HilgaObject(object):
         self.opts = opts
         self.pool = opts.get('pool', None)
 
+        self.hooks = {}
+
+    def add_hook(self, name, callback):
+        hcbs = self.hooks.get(name)
+        if not hcbs:
+            hcbs = self.hooks[name] = []
+        hcbs.append(callback)
+
+    def run_hook(self, name, *args, **kwargs):
+        for cb in self.hooks.get(name, []):
+            cb(*args, **kwargs)
+
     def verbose(self, s, *args):
         self.log.info(s%tuple(args))
 

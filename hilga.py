@@ -37,7 +37,7 @@ def main():
 
    pool = eventlet.GreenPool()
 
-   board = HilgaBoard(pool=pool)
+   board = HilgaBoard(pool=pool, **opts)
 #   board.run()
 
    pool.waitall()
