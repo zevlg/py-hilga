@@ -53,7 +53,6 @@ class GpsSpeedWidget(HilgaGauge):
             return
 
         speed = self.gps.speed_kmh()
-        knots = self.gps.speed_knots()
         pavg = self.avg_speed
         self.calc_moving_avg(speed)
 
@@ -69,13 +68,11 @@ class GpsSpeedWidget(HilgaGauge):
                            (ssxoff, 100))
             self.surf.blit(self.dfnt.render("avg: %d"%int(round(self.avg_speed)),
                                             True, (100,100,100)), (80,220))
-            self.surf.blit(self.dfnt.render("alt: %d"%self.gps.get('alt', -1),
+            self.surf.blit(self.dfnt.render("alt: %d"%self.gps.alt_meters(),
                                             True, (100,100,100)), (80,244))
             self.surf.blit(self.dfnt.render("sat: %d/%d"%(len(self.gps.satellites()),
                                                           self.gps.gps.satellites_used),
                                             True, (100,100,100)), (80,268))
-            self.surf.blit(self.dfnt.render("knots: %d"%knots,
-                                            True, (100,100,100)), (80,292))
 
         self.redraw_into(surf)
         self.speed = speed

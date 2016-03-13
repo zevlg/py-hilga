@@ -5,6 +5,10 @@ import gps
 
 from objects import HilgaObject
 
+MPS_TO_KPH = 3.6000000000000001
+MPS_TO_MPH = 2.2369363
+MPS_TO_KNOTS = 1.9438445
+
 class GpsIface(HilgaObject):
     def __init__(self, **opts):
         super(GpsIface, self).__init__(**opts)
@@ -26,10 +30,13 @@ class GpsIface(HilgaObject):
                 self.tpv.update(data)
 
     def speed_kmh(self):
-        return 1.852 * self.speed_knots()
+        return MPS_TO_KPH * self.speed_mps()
 
-    def speed_knots(self):
+    def speed_mps(self):
         return self.get("speed", 0)
+
+    def alt_meters(self):
+        return int(round(self.get("alt", -1)))
 
     def get(self, name, default):
         return self.tpv.get(name, default)
