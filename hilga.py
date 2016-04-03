@@ -20,7 +20,7 @@ def usage():
 
 def main():
    try:
-      opts, args = getopt.getopt(sys.argv[1:], "")
+      opts, args = getopt.getopt(sys.argv[1:], "", ["odo-file="])
    except getopt.GetoptError, err:
       print str(err)
       usage()

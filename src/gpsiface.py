@@ -37,9 +37,12 @@ Hooks:
         while not self.isdone:
             data = self.gps.next()
 
-            if not self.gotclock and self.time() is not gps.NaN:
+            gpstime = self.time()
+            if not self.gotclock and \
+               isinstance(gpstime, float) and \
+               gpstime is not gps.NaN:
                 # Got clock value for the first time
-                self.run_hook('gotclock', self.time())
+                self.run_hook('gotclock', gpstime)
                 self.gotclock = True
 
 #            print "DATA class", data.get("class"), len(self.gps.satellites), self.gps.satellites_used
