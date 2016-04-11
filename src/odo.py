@@ -106,7 +106,7 @@ class OdoWidget(HilgaWidget):
             cur = self.odo.current / 1000.0
             self.clear()
             self.surf.blit(self.fnt.render("TRP: %.1fKm"%cur, True, self.TRP_COLOR), (0, 0))
-            self.surf.blit(self.fnt.render("ODO: %.1fKKm"%oall, True, self.ODO_COLOR), (0, 30))
+            self.surf.blit(self.fnt.render("ODO: %.2fMm"%oall, True, self.ODO_COLOR), (0, 30))
 
             # update values
             self.odo_all = self.odo.overall
