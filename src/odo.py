@@ -75,7 +75,8 @@ TIMESTAMP METERS\n
         self.odo_increase(delta)
 
         # Write updates only when car stops, but less then every 100 meters
-        if int(gspeed) == 0 and self.step > 100:
+        # Also write when step > 10k
+        if (int(gspeed) == 0 and self.step > 100) or (self.step > 10000):
             self.update_odofile()
 
 
