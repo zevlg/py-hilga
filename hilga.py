@@ -15,12 +15,13 @@ from pygame.locals import *
 from board import HilgaBoard
 
 def usage():
-   print "usage: %s"%sys.argv[0]
+   print "usage: [-m] %s"%sys.argv[0]
+   print "\t-m  \tMute, no sounds ever"
    sys.exit(0)
 
 def main():
    try:
-      opts, args = getopt.getopt(sys.argv[1:], "", ["odo-file="])
+      opts, args = getopt.getopt(sys.argv[1:], "m", ["odo-file=", "mute"])
    except getopt.GetoptError, err:
       print str(err)
       usage()
