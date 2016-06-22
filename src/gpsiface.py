@@ -5,6 +5,10 @@ import gps
 
 from objects import HilgaObject
 
+MPS_TO_KPH = 3.6000000000000001
+MPS_TO_MPH = 2.2369363
+MPS_TO_KNOTS = 1.9438445
+
 class GpsIface(HilgaObject):
     """
 Hooks:
@@ -33,9 +37,12 @@ Hooks:
         while not self.isdone:
             data = self.gps.next()
 
-            if not self.gotclock and self.time() is not gps.NaN:
+            gpstime = self.time()
+            if not self.gotclock and \
+               isinstance(gpstime, float) and \
+               gpstime is not gps.NaN:
                 # Got clock value for the first time
-                self.run_hook('gotclock', self.time())
+                self.run_hook('gotclock', gpstime)
                 self.gotclock = True
 
 #            print "DATA class", data.get("class"), len(self.gps.satellites), self.gps.satellites_used
@@ -44,10 +51,13 @@ Hooks:
                 self.run_hook('onupdate', self)
 
     def speed_kmh(self):
-        return 1.852 * self.speed_knots()
+        return MPS_TO_KPH * self.speed_mps()
 
-    def speed_knots(self):
+    def speed_mps(self):
         return self.get("speed", 0)
+
+    def alt_meters(self):
+        return int(round(self.get("alt", -1)))
 
     def get(self, name, default):
         return self.tpv.get(name, default)

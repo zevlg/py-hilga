@@ -33,7 +33,7 @@ class HilgaBoard(HilgaObject):
         self.coolant = CoolantWidget(obd, (580, 360), **opts)
         self.bat = BatteryWidget(obd, (580, 260), **opts)
         # Use GPS for time, system clock is unreliable
-        self.clk = ClockWidget(obd, (580, 300), timefun=self.gps.time, **opts)
+        self.clk = ClockWidget(obd, (580, 300), timefun=gps.time, **opts)
         self.gps.add_hook('gotclock', self.clk.set_system_time)
 
         # high beam / oil presure / brake
@@ -44,8 +44,8 @@ class HilgaBoard(HilgaObject):
         d100iface = D100Iface(**opts)
         self.d100 = D100Widget(d100iface, (600, 100))
 
-        odoiface = Odoiface(gps, **opts)
-        self.odo = OdoWidget(odoiface, (359, 340), **opts)
+        odoiface = OdoIface(gps, **opts)
+        self.odo = OdoWidget(odoiface, (340, 340), **opts)
 
         self.pool.spawn_n(self.loop_ticks)
 

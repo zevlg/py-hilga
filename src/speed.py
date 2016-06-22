@@ -1,4 +1,4 @@
-import pygame
+import pygame, time
 from math import pi
 
 from obdiface import ObdIface
@@ -12,6 +12,37 @@ ASTOP = pi + pi/4
 SPEED_MIN = 0
 SPEED_MAX = 160 
 
+class AvgValue(object):
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.value = 0
+        self.n = 0
+
+    def avg_with(self, value):
+        if value < 0:
+            return
+        self.n += 1
+        self.value += (value - self.value) / self.n
+        return self.value
+
+    def __str__(self):
+        return str(self.value)
+
+
+class AvgSpeed(AvgValue):
+    def reset(self):
+        super(AvgSpeed, self).reset()
+        self.start = time.time()
+
+    def runtime(self):
+        return time.time() - self.start
+
+    def distance(self):
+        return self.value * self.runtime()
+
+
 SG_WIDTH = 250
 class GpsSpeedWidget(HilgaGauge):
     def __init__(self, gps, (x, y), **opts):
@@ -23,8 +54,7 @@ class GpsSpeedWidget(HilgaGauge):
         self.gps = gps
         self.speed = -100
 
-        self.avg_n = 0
-        self.avg_speed = 0
+        self.avg_speed = AvgSpeed()
 
         self.fnt = load_font("Anton.ttf", 64)
         self.fnt = load_font("Anton.ttf", 96)
@@ -39,43 +69,33 @@ class GpsSpeedWidget(HilgaGauge):
 
         self.ssxoffs = map(gen_ssxoff, ["0", "00", "120"])
 
-    def calc_moving_avg(self, speed):
-        # See wikipedia for `Cumulative moving average'
-        if speed < 0:
-            return
-        
-        self.avg_n += 1
-        self.avg_speed += (speed-self.avg_speed)/self.avg_n
-
     def draw(self, tick, surf):
         # Sample every third tick
         if tick % 3 != 0:
             return
 
         speed = self.gps.speed_kmh()
-        knots = self.gps.speed_knots()
-        pavg = self.avg_speed
-        self.calc_moving_avg(speed)
+        pavg = self.avg_speed.value
+        avg_speed = self.avg_speed.avg_with(speed)
 
         # redraw if changed
         if round(speed) != round(self.speed) \
-               or round(pavg) != round(self.avg_speed):
+               or round(pavg) != round(avg_speed):
             # Redraw gauge pointer
+            self.clear()
             self.redraw_pointer(speed)
 
             speedlbl = "%d"%int(round(speed))
             ssxoff = self.ssxoffs[len(speedlbl)-1]
             self.surf.blit(self.fnt.render(speedlbl, True, (255,255,255)),
                            (ssxoff, 100))
-            self.surf.blit(self.dfnt.render("avg: %d"%int(round(self.avg_speed)),
+            self.surf.blit(self.dfnt.render("avg: %d"%int(round(avg_speed)),
                                             True, (100,100,100)), (80,220))
-            self.surf.blit(self.dfnt.render("alt: %d"%self.gps.get('alt', -1),
+            self.surf.blit(self.dfnt.render("alt: %d"%self.gps.alt_meters(),
                                             True, (100,100,100)), (80,244))
             self.surf.blit(self.dfnt.render("sat: %d/%d"%(len(self.gps.satellites()),
                                                           self.gps.gps.satellites_used),
                                             True, (100,100,100)), (80,268))
-            self.surf.blit(self.dfnt.render("knots: %d"%knots,
-                                            True, (100,100,100)), (80,292))
 
         self.redraw_into(surf)
         self.speed = speed
@@ -89,8 +109,7 @@ class RpmSpeedWidget(HilgaWidget):
         self.speed = -100
         self.speed4 = self.speed5 = 0
 
-        self.avg_n = 0
-        self.avg_speed = 0
+        self.avg_speed = AvgValue()
 
         self.fnt = load_font("Anton.ttf", 32)
 
@@ -103,22 +122,14 @@ class RpmSpeedWidget(HilgaWidget):
 
         self.ssxoffs = map(gen_ssxoff, ["0", "00", "120"])
 
-    def calc_moving_avg(self, speed):
-        # See wikipedia for `Cumulative moving average'
-        if speed < 0:
-            return
-        
-        self.avg_n += 1
-        self.avg_speed += (speed-self.avg_speed)/self.avg_n
-
     def draw(self, tick, surf):
         # Sample every third tick
         if tick % 3 != 0:
             return
 
         speed = self.obd.sensor(ObdIface.SPEED_IDX)
-        pavg = self.avg_speed
-        self.calc_moving_avg(speed)
+        pavg = self.avg_speed.value
+        self.avg_speed.add_value(speed)
 
         # Calc speed according to RPM
         if self.obd.rpm > 1000:
