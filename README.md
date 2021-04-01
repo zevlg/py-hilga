@@ -27,3 +27,7 @@ Screenshot of meter in action:
 
 * Meter simulation, to feed meter with synthetic data to see how it
   performs
+
+# Alternatives
+
+* https://github.com/joshellissh/pi-dgc
